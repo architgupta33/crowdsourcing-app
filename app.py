@@ -191,7 +191,7 @@ if not HF_API_TOKEN:
     st.error("Hugging Face API token is missing. Set HUGGINGFACE_API_TOKEN in your environment.")
     st.stop()
 
-api = InferenceClient(model="HuggingFaceH4/zephyr-7b-beta")
+api = InferenceClient(model="mistralai/Mistral-7B-Instruct-v0.1")
 
 # Load Google Cloud credentials from environment variable
 google_credentials_json = os.getenv("GOOGLE_CREDENTIALS")
