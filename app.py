@@ -203,7 +203,7 @@ if uploaded_images and len(uploaded_images) == 2:
 
         if votes:
             # Summarize Feedback with Hugging Face API
-            st.subheader("Feedback Summary")
+            st.subheader("Feedback Summary (AI Generated)")
             prompt_vote = "You are a count checker. There are 2 photo options a user can place a vote for. Summarize the count of votes: " + str(votes)
             
             # Call the API
