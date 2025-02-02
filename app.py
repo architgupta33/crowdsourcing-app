@@ -8,16 +8,8 @@
 # from oauth2client.service_account import ServiceAccountCredentials
 # from huggingface_hub import InferenceClient
 
-# # Load Hugging Face API token from environment variable
-# # HF_API_TOKEN = os.getenv("HUGGINGFACE_API_TOKEN")
-# # if not HF_API_TOKEN:
-# #     st.error("Hugging Face API token is missing. Set HUGGINGFACE_API_TOKEN in your environment.")
-# #     st.stop()
-
-# # Load API token from secrets
+# # Load Hugging Face API token from secrets
 # HF_API_TOKEN = st.secrets["HUGGINGFACE_API_TOKEN"]
-
-# # api = InferenceClient(model="mistralai/Mistral-7B-Instruct-v0.1", token=HF_API_TOKEN)  # Add authentication token)
 # api = InferenceClient(model="HuggingFaceH4/zephyr-7b-beta", token=HF_API_TOKEN)  # Add authentication token)
 
 # # Load Google Cloud credentials from environment variable
@@ -38,8 +30,9 @@
 
 # # Access Google Sheets
 # try:
-#     sheet_vote = client.open("Crowdsourcing-app").get_worksheet(0)
-#     sheet_feedback = client.open("Crowdsourcing-app").get_worksheet(1)
+#     sheet_vote = client.open("Crowdsourcing-app").get_worksheet(0)  # Votes worksheet
+#     sheet_feedback = client.open("Crowdsourcing-app").get_worksheet(1)  # Feedback worksheet
+#     sheet_comments = client.open("Crowdsourcing-app").get_worksheet(2)  # Comments worksheet
 # except Exception as e:
 #     st.error(f"Error accessing Google Sheets: {e}")
 #     st.stop()
@@ -69,26 +62,34 @@
 
 #     # Check if dilemma has been posted
 #     if st.session_state.get('dilemma_posted', False):
-#         # Voting Buttons
-#         if st.button("Vote for Option 1"):
-#             sheet_vote.append_row(["Option 1", "1"])
-#             st.success("You voted for Option 1!")
+#         # Voting and Comment Section
+#         st.subheader("Vote and Add a Comment")
+#         vote_option = st.radio("Choose your vote:", ["Option 1", "Option 2"])
+#         comment = st.text_area("Add a comment (optional):")
 
-#         if st.button("Vote for Option 2"):
-#             sheet_vote.append_row(["Option 2", "1"])
-#             st.success("You voted for Option 2!")
+#         if st.button("Submit Vote"):
+#             if vote_option:
+#                 # Append vote to the Votes worksheet
+#                 sheet_vote.append_row([vote_option])
+                
+#                 # Append comment to the Comments worksheet (if provided)
+#                 if comment:
+#                     sheet_comments.append_row([vote_option, comment])
+#                     st.success(f"You voted for {vote_option} and your comment has been recorded!")
+#                 else:
+#                     st.success(f"You voted for {vote_option}!")
+#             else:
+#                 st.warning("Please select a vote option.")
 
 #         # Fetch and Display Votes
-#         st.subheader("Community Votes")
-#         vote = sheet_vote.col_values(1)
-#         feedback = sheet_feedback.col_values(1)
+#         # st.subheader("Community Votes")
+#         votes = sheet_vote.col_values(1)  # Fetch all votes
 
-#         # Summarize Feedback with Llama 3.1
-#         if len(vote) > 0:
-#             st.subheader("Feedback Summary")
-#             # Define input prompt
-#             prompt_vote = "You are a count checker. There are 2 photo options a user can place a vote for. Summarize the count of votes: " + str(vote)
-
+#         if votes:
+#             # Summarize Feedback with Hugging Face API
+#             st.subheader("Feedback Summary (AI Generated)")
+#             prompt_vote = "You are a count checker. There are 2 photo options a user can place a vote for. Summarize the count of votes: " + str(votes)
+            
 #             # Call the API
 #             response = api.chat_completion(messages=[{"role": "user", "content": prompt_vote}])
             
@@ -98,10 +99,29 @@
 #                 st.write(content)
 #             else:
 #                 st.error("Failed to fetch a valid response from the API.")
+
+#             # Fetch and Summarize Comments
+#             # st.subheader("Comments Summary")
+#             comments = sheet_comments.col_values(2)  # Fetch all comments (column 2)
+#             if comments:
+#                 # Combine all comments into a single string
+#                 comments_text = " ".join(comments)
+                
+#                 # Generate a summary using Hugging Face API
+#                 prompt_summary = f"Summarize the following user comments in 2-3 sentences: {comments_text}"
+#                 summary_response = api.chat_completion(messages=[{"role": "user", "content": prompt_summary}])
+                
+#                 # Display the summary
+#                 if summary_response and 'choices' in summary_response and len(summary_response['choices']) > 0:
+#                     summary = summary_response['choices'][0]['message']['content']
+#                     st.write(summary)
+#                 else:
+#                     st.error("Failed to generate a summary of comments.")
+#             else:
+#                 st.info("No comments yet.")
             
 #             # Plot Vote Results
-#             # Vote Count
-#             vote_counts = {"Option 1": vote.count("Option 1"), "Option 2": vote.count("Option 2")}
+#             vote_counts = {"Option 1": votes.count("Option 1"), "Option 2": votes.count("Option 2")}
 
 #             # Convert to DataFrame
 #             df = pd.DataFrame(list(vote_counts.items()), columns=["Option", "Votes"])
@@ -112,7 +132,6 @@
 #             ax.set_title("Voting Visualization")
 #             ax.set_ylabel("Number of Votes")
 #             st.pyplot(fig)
-
 
 import streamlit as st
 import gspread
@@ -198,7 +217,6 @@ if uploaded_images and len(uploaded_images) == 2:
                 st.warning("Please select a vote option.")
 
         # Fetch and Display Votes
-        # st.subheader("Community Votes")
         votes = sheet_vote.col_values(1)  # Fetch all votes
 
         if votes:
@@ -217,7 +235,6 @@ if uploaded_images and len(uploaded_images) == 2:
                 st.error("Failed to fetch a valid response from the API.")
 
             # Fetch and Summarize Comments
-            # st.subheader("Comments Summary")
             comments = sheet_comments.col_values(2)  # Fetch all comments (column 2)
             if comments:
                 # Combine all comments into a single string
@@ -249,4 +266,24 @@ if uploaded_images and len(uploaded_images) == 2:
             ax.set_ylabel("Number of Votes")
             st.pyplot(fig)
 
+        # Fully AI-Generated Analysis Section
+        st.subheader("AI-Generated Analysis")
+        if post and uploaded_images:
+            # Craft a prompt for the AI to analyze the images and the user's query
+            ai_prompt = (
+                f"The user has uploaded two images and described their dilemma as: '{post}'. "
+                "Based on the images and the user's query, provide a detailed analysis or recommendation. "
+                "Consider factors like aesthetics, practicality, and user preferences."
+            )
             
+            # Call the Hugging Face API for AI-generated analysis
+            ai_response = api.chat_completion(messages=[{"role": "user", "content": ai_prompt}])
+            
+            # Display the AI-generated analysis
+            if ai_response and 'choices' in ai_response and len(ai_response['choices']) > 0:
+                ai_analysis = ai_response['choices'][0]['message']['content']
+                st.write(ai_analysis)
+            else:
+                st.error("Failed to generate an AI analysis.")
+        else:
+            st.info("Please upload two images and describe your dilemma to get an AI-generated analysis.")
