@@ -267,7 +267,7 @@ if uploaded_images and len(uploaded_images) == 2:
             st.pyplot(fig)
 
         # Fully AI-Generated Analysis Section
-        st.subheader("AI-Generated Analysis (Doesn't consider user sumitted votes/comments)")
+        st.subheader("AI-Generated Analysis (Doesn't consider user submitted votes/comments)")
         if post and uploaded_images:
             # Craft a prompt for the AI to analyze the images and the user's query
             ai_prompt = (
