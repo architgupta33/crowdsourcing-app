@@ -186,10 +186,13 @@ from oauth2client.service_account import ServiceAccountCredentials
 from huggingface_hub import InferenceClient
 
 # Load Hugging Face API token from environment variable
-HF_API_TOKEN = os.getenv("HUGGINGFACE_API_TOKEN")
-if not HF_API_TOKEN:
-    st.error("Hugging Face API token is missing. Set HUGGINGFACE_API_TOKEN in your environment.")
-    st.stop()
+# HF_API_TOKEN = os.getenv("HUGGINGFACE_API_TOKEN")
+# if not HF_API_TOKEN:
+#     st.error("Hugging Face API token is missing. Set HUGGINGFACE_API_TOKEN in your environment.")
+#     st.stop()
+
+# Load API token from secrets
+HF_API_TOKEN = st.secrets["HUGGINGFACE_API_TOKEN"]
 
 api = InferenceClient(model="mistralai/Mistral-7B-Instruct-v0.1")
 
