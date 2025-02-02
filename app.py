@@ -2,6 +2,9 @@ import streamlit as st
 import gspread
 import os
 import json
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
 from oauth2client.service_account import ServiceAccountCredentials
 from huggingface_hub import InferenceClient
 
