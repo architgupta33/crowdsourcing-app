@@ -229,11 +229,22 @@ if uploaded_images and len(uploaded_images) == 2:
             ax.set_ylabel("Number of Votes")
             st.pyplot(fig)
 
-            # Fetch and Display Comments
-            st.subheader("User Comments")
-            comments = sheet_comments.get_all_records()  # Fetch all comments
+            # Fetch and Summarize Comments
+            st.subheader("Comments Summary")
+            comments = sheet_comments.col_values(2)  # Fetch all comments (column 2)
             if comments:
-                for comment in comments:
-                    st.write(f"**{comment['Option']}**: {comment['Comment']}")
+                # Combine all comments into a single string
+                comments_text = " ".join(comments)
+                
+                # Generate a summary using Hugging Face API
+                prompt_summary = f"Summarize the following user comments in 2-3 sentences: {comments_text}"
+                summary_response = api.chat_completion(messages=[{"role": "user", "content": prompt_summary}])
+                
+                # Display the summary
+                if summary_response and 'choices' in summary_response and len(summary_response['choices']) > 0:
+                    summary = summary_response['choices'][0]['message']['content']
+                    st.write(summary)
+                else:
+                    st.error("Failed to generate a summary of comments.")
             else:
                 st.info("No comments yet.")
