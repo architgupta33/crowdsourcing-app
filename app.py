@@ -194,7 +194,7 @@ from huggingface_hub import InferenceClient
 # Load API token from secrets
 HF_API_TOKEN = st.secrets["HUGGINGFACE_API_TOKEN"]
 
-api = InferenceClient(model="mistralai/Mistral-7B-Instruct-v0.1")
+api = InferenceClient(model="mistralai/Mistral-7B-Instruct-v0.1", token=HF_API_TOKEN)  # Add authentication token)
 
 # Load Google Cloud credentials from environment variable
 google_credentials_json = os.getenv("GOOGLE_CREDENTIALS")
