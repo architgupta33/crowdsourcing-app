@@ -99,6 +99,9 @@ if uploaded_images and len(uploaded_images) == 2:
             else:
                 st.error("Failed to fetch a valid response from the API.")
 
+            # Vote Count
+            vote_counts = {"Option 1": vote.count("Option 1"), "Option 2": vote.count("Option 2")}
+
             # Convert to DataFrame
             df = pd.DataFrame(list(vote_counts.items()), columns=["Option", "Votes"])
 
