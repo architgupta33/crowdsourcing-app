@@ -198,7 +198,7 @@ if uploaded_images and len(uploaded_images) == 2:
                 st.warning("Please select a vote option.")
 
         # Fetch and Display Votes
-        st.subheader("Community Votes")
+        # st.subheader("Community Votes")
         votes = sheet_vote.col_values(1)  # Fetch all votes
 
         if votes:
@@ -215,22 +215,9 @@ if uploaded_images and len(uploaded_images) == 2:
                 st.write(content)
             else:
                 st.error("Failed to fetch a valid response from the API.")
-            
-            # Plot Vote Results
-            vote_counts = {"Option 1": votes.count("Option 1"), "Option 2": votes.count("Option 2")}
-
-            # Convert to DataFrame
-            df = pd.DataFrame(list(vote_counts.items()), columns=["Option", "Votes"])
-
-            st.subheader("Voting Visualization")
-            fig, ax = plt.subplots()
-            sns.barplot(x="Option", y="Votes", data=df, ax=ax, palette=["#1f77b4", "#ff7f0e"])
-            ax.set_title("Voting Visualization")
-            ax.set_ylabel("Number of Votes")
-            st.pyplot(fig)
 
             # Fetch and Summarize Comments
-            st.subheader("Comments Summary")
+            # st.subheader("Comments Summary")
             comments = sheet_comments.col_values(2)  # Fetch all comments (column 2)
             if comments:
                 # Combine all comments into a single string
@@ -248,3 +235,18 @@ if uploaded_images and len(uploaded_images) == 2:
                     st.error("Failed to generate a summary of comments.")
             else:
                 st.info("No comments yet.")
+            
+            # Plot Vote Results
+            vote_counts = {"Option 1": votes.count("Option 1"), "Option 2": votes.count("Option 2")}
+
+            # Convert to DataFrame
+            df = pd.DataFrame(list(vote_counts.items()), columns=["Option", "Votes"])
+
+            st.subheader("Voting Visualization")
+            fig, ax = plt.subplots()
+            sns.barplot(x="Option", y="Votes", data=df, ax=ax, palette=["#1f77b4", "#ff7f0e"])
+            ax.set_title("Voting Visualization")
+            ax.set_ylabel("Number of Votes")
+            st.pyplot(fig)
+
+            
